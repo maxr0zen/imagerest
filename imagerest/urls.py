@@ -25,6 +25,10 @@ from posts.views import *
 
 router = routers.DefaultRouter()
 
+
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('django.contrib.auth.urls')),
@@ -34,7 +38,10 @@ urlpatterns = [
     path('api/login/', login_view),
     path('api/user-info/', user_info, name='user_info'),
     path('post_create/', create_post, name='create_post'),
-    path('toggle-like/<int:post_id>/', toggle_like, name='toggle_like')
+    path('toggle-like/<int:post_id>/', toggle_like, name='toggle_like'),
+    path('post/<int:pk>/', get_post_details, name='post_detail'),
+    path('post/<int:pk>/add-comment/', add_comment, name='add_comment'),
+    #сделать комменты, сделать вывод поста с комментами и лайками
 ]
 
 if settings.DEBUG:

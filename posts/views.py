@@ -5,7 +5,7 @@ from jwt import algorithms
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
@@ -79,7 +79,7 @@ def toggle_like(request, post_id):
         Like.objects.create(user=user, post=post)
         message = 'Like added successfully.'
 
-    return Response({'message': message})
+    return JsonResponse({'message': message})
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -94,3 +94,28 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         return obj.comment_set.count()
+
+
+def add_comment(request, post_id):
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post_id = post_id
+            comment.save()
+            return JsonResponse({"message": "comment added"})
+    else:
+        form = CommentForm()
+    return JsonResponse({"message": "somthing wrong"})
+
+
+def get_post_details(post_id):
+    post = Post.objects.select_related('author').prefetch_related('like_set', 'comment_set').get(id=post_id)
+    likes_count = post.like_set.count()
+    comments = post.comment_set.all()
+    return JsonResponse({
+        'post': post,
+        'likes_count': likes_count,
+        'comments': comments
+    })

@@ -82,14 +82,17 @@ def some_protected_view(request):
 class RegisterUserView(APIView):
     def post(self, request, format=None):
         form = UserCreationForm(request.data)
+        print(request.data)
+        print(form)
+        print(get_token(request))
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Автоматически войти после успешной регистрации
+            login(request, user)
             return JsonResponse({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
         return JsonResponse({'message': 'somthing wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt  # Для упрощения примера, отключаем CSRF-защиту
+@csrf_exempt
 def user_info(request):
     if request.method == 'GET':
         try:
