@@ -20,20 +20,16 @@ from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
-from users.views import RegisterUserView, login_view, user_info
+from users.views import RegisterUserView, login_view, user_info, UnsubscribeAPIView, SubscribeAPIView
 from posts.views import *
 
 router = routers.DefaultRouter()
-
-
-
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('django.contrib.auth.urls')),
     path('api/', include(router.urls)),
-    path('api/token', obtain_auth_token,name='token_obtain_pair'),
+    path('api/token', obtain_auth_token, name='token_obtain_pair'),
     path('api/register/', RegisterUserView.as_view(), name='register'),
     path('api/login/', login_view),
     path('api/user-info/', user_info, name='user_info'),
@@ -41,7 +37,10 @@ urlpatterns = [
     path('toggle-like/<int:post_id>/', toggle_like, name='toggle_like'),
     path('post/<int:pk>/', get_post_details, name='post_detail'),
     path('post/<int:pk>/add-comment/', add_comment, name='add_comment'),
-    #сделать комменты, сделать вывод поста с комментами и лайками
+    path('subscribe/<int:user_id>/', SubscribeAPIView.as_view(), name='subscribe'),
+    path('unsubscribe/<int:user_id>/', UnsubscribeAPIView.as_view(), name='unsubscribe'),
+    path('user/feed/', get_user_feed, name='user_feed'),  # лента с его постами
+    path('user/posts/', UserPostsAPIView.as_view(), name='user_posts'),  # лента с постами тех, на кого подписан user
 ]
 
 if settings.DEBUG:

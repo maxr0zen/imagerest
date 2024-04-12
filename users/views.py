@@ -5,8 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, status
 from django.contrib.auth.models import User
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer
+
+from .models import Subscription
+from .serializers import UserSerializer, SubscriptionSerializer
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate, login
@@ -110,6 +114,38 @@ def user_info(request):
 
         except jwt.InvalidTokenError:
             return HttpResponseForbidden('Invalid JWT token')
+
+
+class SubscribeAPIView(APIView):
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(User, id=user_id)
+        subscription = Subscription.objects.create(follower=request.user, following=user_to_follow)
+        serializer = SubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UnsubscribeAPIView(APIView):
+    def delete(self, request, user_id):
+        user_to_unfollow = get_object_or_404(User, id=user_id)
+        subscription = Subscription.objects.filter(follower=request.user, following=user_to_unfollow)
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SubscribeAPIView(APIView):
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(User, id=user_id)
+        subscription = Subscription.objects.create(follower=request.user, following=user_to_follow)
+        serializer = SubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UnsubscribeAPIView(APIView):
+    def delete(self, request, user_id):
+        user_to_unfollow = get_object_or_404(User, id=user_id)
+        subscription = Subscription.objects.filter(follower=request.user, following=user_to_unfollow)
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 '''

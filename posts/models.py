@@ -38,3 +38,14 @@ class Like(models.Model):
         unique_together = ('user', 'post')
 
 
+
+
+
+class Feed(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    posts = models.ManyToManyField('YourApp.Post', related_name='feed_posts')
+
+    def __str__(self):
+        return f"Feed for {self.user.username}"
+
+

@@ -29,7 +29,8 @@ import jwt
 from datetime import datetime, timedelta
 from rest_framework.serializers import ValidationError
 from rest_framework import serializers
-from .models import Post, Like
+from .models import Post, Like, Feed
+
 
 
 @api_view(['POST'])
@@ -119,3 +120,19 @@ def get_post_details(post_id):
         'likes_count': likes_count,
         'comments': comments
     })
+
+
+def get_user_feed(user):
+    feed = Feed.objects.get(user=user)
+    return feed.posts.all()
+
+
+class UserPostsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        subscriptions = Subscription.objects.filter(follower=request.user)
+        following_ids = [sub.following_id for sub in subscriptions]
+        posts = Post.objects.filter(author_id__in=following_ids)
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
